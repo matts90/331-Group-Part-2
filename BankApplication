@@ -1,65 +1,167 @@
 /*
-Date: ***************2016
+Date: 4/5/2016
 Application Name: Semester Project – Part 2: 
                     First Shenandoah Bank Information System
-Class: Standard Account
 Team Members: Matt Seiler, Andrew Mize, Danielle Vasquez, Anton Zelster
 Purpose: Banking system with menus to create Customers/accounts, accept deposits
 and withdrawals. Also can display current balance and transaction reports.
 */
 package GroupPart2;
 import java.util.*;
-import java.text.*;
-public class StandardAccount {
-    private ArrayList<BankTransaction> transactions = new ArrayList<BankTransaction>();
+public class BankApplication {
+    //We all contributed to each section.
     
-    private BankCustomer myCustomer;
-    
-    public StandardAccount(BankCustomer myCustomer){
-        this.myCustomer = myCustomer;
+    //ArrayLists for accounts and customers
+    public static ArrayList<StandardAccount> accounts = new 
+        ArrayList<StandardAccount>(); 
+    public static ArrayList<BankCustomer> customers = new
+        ArrayList<BankCustomer>();
+    public static void main(String[] args) {
+        String menuChoice;
+        System.out.println("Welcome to First Shenandoah Bank!");  
+        
+        //run this infinite loop so this code below is the only thing that runs
+       //when returning to Menu 
+       int x = 0;//for infinite do while loop below
+       do{
+        
+           menuChoice = mainMenuPrint(); //Print menu method
+           
+           switch (menuChoice){ //choose method to call based on user's option
+             case "1": createCustomer();break;
+             case "2": createAccount();break;
+             case "3": makeDeposit();break;
+             case "4": makeWithdrawal();break;
+             case "5": printAccountListing();break;
+             case "-1": System.out.println("Exiting Program - Thank you!");
+                       System.exit(0);break;
+         }   
+        }while (x==0);
+        
     }
     
-    public void enterTransaction(String description, double amount){
-        transactions.add(new BankTransaction(description, amount)); 
+    public static String mainMenuPrint(){
+        //Print menu
+        Scanner in = new Scanner(System.in);
+        System.out.print("\nMake Menu Choice:"
+                           + "\n1: Create Customer"
+                           + "\n2: Create Account"
+                           + "\n3: Make Deposit"
+                           + "\n4: Make Withdrawal"
+                           + "\n5: Print Account Listing"
+                           + "\n-1: Exit Program \n"
+                           + "--------------\nEnter Choice: ");
+        
+       return in.nextLine(); //user's selection   
     }
     
-    public double getBalance(){
-        double balance=0.0;
-        for(BankTransaction e : transactions){
-           balance += e.getAmount();
+    public static void createCustomer(){
+        //User adds a customer name 
+        Scanner in = new Scanner(System.in);
+        System.out.print("Enter Customer Full Name: ");
+        String name = in.nextLine();
+        //add customer object to the customers arraylist
+        customers.add(new BankCustomer(name));
+        System.out.println("\nCustomer Created!");
+    }
+    
+    public static void createAccount(){
+        //User connects an account to a current customer
+        if(customers.size() > 0){//Validates that there are customers
+            Scanner in = new Scanner(System.in);
+            System.out.println("Select a customer who will own the new "
+                                + "account: ");
+            printCustomers();//Print Customer method
+            int choice = in.nextInt();
+            for(BankCustomer e: customers){ //sift through customers arraylist
+                if (e.getCustomerID() == choice){ //customerID = input?
+                    accounts.add(new StandardAccount(e));//add new account object                                       
+                    System.out.println("\nAccount Created!");break;
+                }
+            }
         }
-        return balance; 
+        
+        else
+            System.out.println("No customers. Create Customer first!");   
     }
     
-    public String getTransaction(int pos){
-        return transactions.get(pos).toString(); //this right??????
+    public static void makeDeposit(){
+        if(customers.size() > 0){//Validates that there are customers
+            Scanner in = new Scanner(System.in);
+            System.out.println("Select a customer to make a Deposit for: ");
+            printCustomers();//Print Customer method
+            int choice = in.nextInt();
+            for(StandardAccount e: accounts){//sift through accountss arraylist
+                if (e.getCustomer().getCustomerID() == choice){
+                    System.out.print("Enter Transaction Description: "); 
+                    in.nextLine(); //process \n from previous in.nextInt() 
+                    String description = in.nextLine();
+                    System.out.print("Enter Amount as 0.0: ");
+                    double amount = in.nextDouble();
+                    //pass inputs to enterTransaction method is BankTransaction
+                    e.enterTransaction(description,amount);
+                    System.out.println("\nSuccessful Deposit!");break;
+                }
+            }
+        }
+        else
+            System.out.println("No customers. Create Customer first!");    
     }
     
-    public BankCustomer getCustomer(){
-        return myCustomer; 
+    public static void makeWithdrawal(){
+        if(customers.size() > 0){//Validates that there are customers
+            Scanner in = new Scanner(System.in);
+            System.out.println("Select a customer to make a Withdrawal for: ");
+            printCustomers();//Print Customer method
+            int choice = in.nextInt();
+            for(StandardAccount e: accounts){//sift through accounts arraylist
+                if (e.getCustomer().getCustomerID() == choice){
+                    in.nextLine(); //process \n from previous in.nextInt()
+                    System.out.print("Enter Transaction Description: ");
+                    String description = in.nextLine();
+                    System.out.print("Enter Amount as 0.0: ");
+                    //pass inputs to enterTransaction method is BankTransaction
+                    e.enterTransaction(description,(-1 * in.nextDouble()));
+                    System.out.println("\nSuccessful Withdrawal!");break; 
+                }
+            }
+        }
+        else
+            System.out.println("No customers. Create Customer first!");
     }
     
-    public String accountListing(){   //***************ADD BALANCE!!!!!!!!!!!
-        String listing = "";
-        String description = "";
-        double amount = 0.0;
-        String dateTime = "";
-        for(int i=0;i<transactions.size();i++){
-            
-            description = transactions.get(i).getDescription();
-            amount = transactions.get(i).getAmount();
-            dateTime = transactionTimeStamp(transactions.get(i).getTimeStamp());
-            
-            listing += dateTime + "\t" + amount + "\t" + description + "\n";  
-                    } 
-       return listing;
+    public static void printAccountListing(){
+        if(customers.size() > 0){//Validates that there are customers
+            Scanner in = new Scanner(System.in);
+            System.out.println("Select a customer to print their account: ");
+            printCustomers();//Print Customer method
+            int choice = in.nextInt();
+            for(StandardAccount e: accounts){//sift through accounts arraylist
+                if (e.getCustomer().getCustomerID() == choice){
+                    System.out.println("Customer: "
+                                    + e.getCustomer().getCustomerName()
+                                    + "\n--------------");
+                    System.out.print(e.accountListing()
+                                    + "--------------\n");
+                    System.out.println("Balance: " + e.getBalance());
+                    break; 
+                }
+            }
+        }
+        else
+            System.out.println("No customers. Create Customer first!");
     }
     
-    public String transactionTimeStamp(long millis){
-        //Convert milliseconds to date/time
-        SimpleDateFormat dateFormat = new SimpleDateFormat("M/dd/yyyy"
-                                                     + " hh:mm:ss a");
-        Date newDate = new Date(millis);
-        return dateFormat.format(newDate);
+    public static void printCustomers(){
+                    //print list of customers
+                    for(BankCustomer e: customers){
+                System.out.println(e.getCustomerID() 
+                                    + ": "
+                                    + e.getCustomerName());  
+            }
+            System.out.print("--------------\nEnter ID Choice: ");
     }
+    
 }
+
+
